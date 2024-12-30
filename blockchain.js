@@ -46,18 +46,18 @@ class Blockchain {
         nonce
       );
       if (hash !== validateHash) return false;
-      if(Math.abs(lastDifficulty-difficulty>1)) return false;
+      if(Math.abs(lastDifficulty-difficulty)>1) return false;
     }
     return true;
   }
 }
 
-const blockchain = new Blockchain();
-blockchain.addBlock({ data: "block1" });
-blockchain.addBlock({ data: "block2" });
-blockchain.addBlock({ data: "block3" });
-blockchain.addBlock({ data: "block4" });
-blockchain.addBlock({ data: "block5" });
+// const blockchain = new Blockchain();
+// blockchain.addBlock({ data: "block1" });
+// blockchain.addBlock({ data: "block2" });
+// blockchain.addBlock({ data: "block3" });
+// blockchain.addBlock({ data: "block4" });
+// blockchain.addBlock({ data: "block5" });
 
 
 
