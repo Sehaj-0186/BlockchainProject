@@ -1,38 +1,56 @@
-const { GENESIS_DATA } = require('./config')
-const cryptoHash = require('./crypto-hash')
-class Block{
-    constructor({timestamp,prevHash,hash,data}){
-        this.timestamp= timestamp;
-        this.prevHash= prevHash;
-        this.hash= hash;
-        this.data= data;
+const { GENESIS_DATA, MINE_RATE } = require("./config");
+const cryptoHash = require("./crypto-hash");
+class Block {
+  constructor({ timestamp, prevHash, hash, data, nonce, difficulty }) {
+    this.timestamp = timestamp;
+    this.prevHash = prevHash;
+    this.hash = hash;
+    this.data = data;
+    this.nonce = nonce;
+    this.difficulty = difficulty;
+  }
+
+  static genesis() {
+    return new this(GENESIS_DATA);
+  }
+
+  static mineBlock({ prevBlock, data }) {
+    let hash, timestamp;
+    const prevHash = prevBlock.hash;
+    let {difficulty} = prevBlock;
+
+    let nonce = 0;
+    do {
+      nonce++;
+      timestamp = Date.now();
+      difficulty=Block.adjustDifficulty({originalBlock:prevBlock,timestamp})
+      hash = cryptoHash(timestamp, prevHash, difficulty, nonce, data);
+    } while (hash.substring(0, difficulty) !== "0".repeat(difficulty));
+
+    return new this({
+      timestamp,
+      prevHash,
+      data,
+      difficulty,
+      nonce,
+      hash
+    });
+  }
+   
+   static adjustDifficulty({originalBlock, timestamp}){
+    const {difficulty}= originalBlock;
+
+    const difference = timestamp-originalBlock.timestamp;
+    if(difficulty<1) return 1;
+    if(difference>MINE_RATE){
+        return difficulty-1;
+    }else{
+      return difficulty+1;
     }
 
-    static genesis(){
-        return new this(GENESIS_DATA);   
-    }
-
-    static mineBlock({prevBlock, data}){
-        const timestamp = Date.now();
-        const prevHash = prevBlock.hash;
-        return new this({
-            timestamp,
-            prevHash,
-            data,
-            hash: cryptoHash(timestamp, prevHash,data)
-    })
-        }
-    }
+   }
 
 
-
-// const block1 = new Block({timestamp:'29/12/2024',prevHash:'0x3edgcvb',hash:'12jd22es',data:'I made a transaction'});
-// // console.log(block1)
-
-// const genesisBlock = Block.genesis();
-
-// const result = Block.mineBlock({prevBlock:block1, data:'block2'})
-
-// console.log(result)
+}
 
 module.exports = Block;
