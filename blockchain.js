@@ -15,11 +15,12 @@ class Blockchain {
   }
 
   replaceChain(chain) {
-    if (chain <= this.chain.length) {
-      console.error("The Incoming chain is not valid");
+    if (chain.length <= this.chain.length) {
+      console.error("The incoming chain is not longer");
+      return;
     }
     if (!Blockchain.isValidChain(chain)) {
-      console.error("The Incoming chain is not Valid");
+      console.error("The incoming chain is not valid");
       return;
     }
     this.chain = chain;
@@ -29,36 +30,32 @@ class Blockchain {
     if (JSON.stringify(chain[0]) !== JSON.stringify(Block.genesis())) {
       return false;
     }
-
     for (let i = 1; i < chain.length; i++) {
-      const { timestamp, prevHash, hash, data, difficulty, nonce } = chain[i];
+      const { timestamp, prevHash, hash, nonce, difficulty, data } = chain[i];
+      const lastDifficulty = chain[i - 1].difficulty;
       const realLastHash = chain[i - 1].hash;
-      const lastDifficulty = chain[i-1].difficulty;
-      if (prevHash !== realLastHash) {
-        return false;
-      }
-      const validateHash = cryptoHash(
+
+      if (prevHash !== realLastHash) return false;
+
+      const validatedHash = cryptoHash(
         timestamp,
         prevHash,
-        hash,
-        data,
+        nonce,
         difficulty,
-        nonce
+        data
       );
-      if (hash !== validateHash) return false;
-      if(Math.abs(lastDifficulty-difficulty)>1) return false;
+      if (hash !== validatedHash) return false;
+      if (Math.abs(lastDifficulty - difficulty) > 1) return false;
     }
     return true;
   }
 }
 
 // const blockchain = new Blockchain();
-// blockchain.addBlock({ data: "block1" });
-// blockchain.addBlock({ data: "block2" });
-// blockchain.addBlock({ data: "block3" });
-// blockchain.addBlock({ data: "block4" });
-// blockchain.addBlock({ data: "block5" });
-
-
-
+// blockchain.addBlock({ data: "Block1" });
+// blockchain.addBlock({ data: "Block2" });
+// const result = Blockchain.isValidChain(blockchain.chain);
+// console.log(blockchain.chain);
+// console.log(result);
+// //console.log(blockchain);
 module.exports = Blockchain;
